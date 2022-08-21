@@ -215,8 +215,6 @@ pub use {tokio_serde, tokio_util};
 #[cfg_attr(docsrs, doc(cfg(feature = "serde-transport")))]
 pub mod serde_transport;
 
-pub mod trace;
-
 #[cfg(feature = "serde1")]
 pub use tarpc_plugins::derive_serde;
 
@@ -330,10 +328,6 @@ pub enum ClientMessage<T> {
     /// not be canceled, because the framework layer does not
     /// know about them.
     Cancel {
-        /// The trace context associates the message with a specific chain of causally-related actions,
-        /// possibly orchestrated across many distributed systems.
-        #[cfg_attr(feature = "serde1", serde(default))]
-        trace_context: trace::Context,
         /// The ID of the request to cancel.
         request_id: u64,
     },

@@ -3,8 +3,8 @@ name = "tarpc"
 version = "0.30.0"
 rust-version = "1.58.0"
 authors = [
-    "Adam Wright <adam.austin.wright@gmail.com>",
-    "Tim Kuehn <timothy.j.kuehn@gmail.com>",
+	"Adam Wright <adam.austin.wright@gmail.com>",
+	"Tim Kuehn <timothy.j.kuehn@gmail.com>",
 ]
 edition = "2021"
 license = "MIT"
@@ -27,12 +27,12 @@ serde-transport-bincode = ["tokio-serde/bincode"]
 tcp = ["tokio/net"]
 
 full = [
-    "serde1",
-    "tokio1",
-    "serde-transport",
-    "serde-transport-json",
-    "serde-transport-bincode",
-    "tcp",
+	"serde1",
+	"tokio1",
+	"serde-transport",
+	"serde-transport-json",
+	"serde-transport-bincode",
+	"tcp",
 ]
 
 [badges]
@@ -44,21 +44,17 @@ fnv = "1.0"
 futures = "0.3"
 humantime = "2.0"
 pin-project = "1.0"
-rand = "0.8"
 serde = { optional = true, version = "1.0", features = ["derive"] }
 static_assertions = "1.1.0"
 tarpc-plugins = { path = "../plugins", version = "0.12" }
 thiserror = "1.0"
-tokio = { version = "1", features = ["time"] }
+tokio = { version = "1", features = [] }
 tokio-util = { version = "0.7.3", features = ["time"] }
 tokio-serde = { optional = true, version = "0.8" }
 tracing = { version = "0.1", default-features = false, features = [
-    "attributes",
-    "log",
+	"attributes",
+	"log",
 ] }
-tracing-opentelemetry = { version = "0.17.2", default-features = false }
-opentelemetry = { version = "0.17.0", default-features = false }
-
 
 [dev-dependencies]
 assert_matches = "1.4"
@@ -66,16 +62,14 @@ bincode = "1.3"
 bytes = { version = "1", features = ["serde"] }
 flate2 = "1.0"
 futures-test = "0.3"
-opentelemetry = { version = "0.17.0", default-features = false, features = [
-    "rt-tokio",
-] }
-opentelemetry-jaeger = { version = "0.16.0", features = ["rt-tokio"] }
 pin-utils = "0.1.0-alpha"
 serde_bytes = "0.11"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-tokio = { version = "1", features = ["full", "test-util"] }
+tokio = { version = "1", features = ["macros", "test-util"] }
 tokio-serde = { version = "0.8", features = ["json", "bincode"] }
 trybuild = "1.0"
+wasm-bindgen = "0.2"
+wasm-bindgen-test = "0.2"
 
 [package.metadata.docs.rs]
 all-features = true

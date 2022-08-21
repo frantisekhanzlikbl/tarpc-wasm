@@ -10,7 +10,7 @@ mod in_flight_requests;
 
 use crate::{
     cancellations::{cancellations, CanceledRequests, RequestCancellation},
-    context, trace, ClientMessage, Request, Response, ServerError, Transport,
+    context, ClientMessage, Request, Response, ServerError, Transport,
 };
 use futures::{prelude::*, ready, stream::Fuse, task::*};
 use in_flight_requests::{DeadlineExceededError, InFlightRequests};
@@ -116,7 +116,6 @@ impl<Req, Resp> Channel<Req, Resp> {
         name = "RPC",
         skip(self, ctx, request_name, request),
         fields(
-            rpc.trace_id = tracing::field::Empty,
             rpc.deadline = %humantime::format_rfc3339(ctx.deadline),
             otel.kind = "client",
             otel.name = request_name)
@@ -128,13 +127,7 @@ impl<Req, Resp> Channel<Req, Resp> {
         request: Req,
     ) -> Result<Resp, RpcError> {
         let span = Span::current();
-        ctx.trace_context = trace::Context::try_from(&span).unwrap_or_else(|_| {
-            tracing::trace!(
-                "OpenTelemetry subscriber not installed; making unsampled child context."
-            );
-            ctx.trace_context.new_child()
-        });
-        span.record("rpc.trace_id", &tracing::field::display(ctx.trace_id()));
+
         let (response_completion, mut response) = oneshot::channel();
         let request_id =
             u64::try_from(self.next_request_id.fetch_add(1, Ordering::Relaxed)).unwrap();
@@ -516,7 +509,6 @@ where
             message: request,
             context: context::Context {
                 deadline: ctx.deadline,
-                trace_context: ctx.trace_context,
             },
         });
         self.start_send(request)?;
@@ -539,10 +531,7 @@ where
         };
         let _entered = span.enter();
 
-        let cancel = ClientMessage::Cancel {
-            trace_context: context.trace_context,
-            request_id,
-        };
+        let cancel = ClientMessage::Cancel { request_id };
         self.start_send(cancel)?;
         tracing::info!("CancelRequest");
         Poll::Ready(Some(Ok(())))

@@ -94,7 +94,6 @@ impl<Req, Resp> FakeChannel<io::Result<TrackedRequest<Req>>, Response<Resp>> {
             request: Request {
                 context: context::Context {
                     deadline: SystemTime::UNIX_EPOCH,
-                    trace_context: Default::default(),
                 },
                 id,
                 message,

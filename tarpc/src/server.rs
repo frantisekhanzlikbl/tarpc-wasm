@@ -8,8 +8,7 @@
 
 use crate::{
     cancellations::{cancellations, CanceledRequests, RequestCancellation},
-    context::{self, SpanExt},
-    trace, ClientMessage, Request, Response, Transport,
+    context, ClientMessage, Request, Response, Transport,
 };
 use ::tokio::sync::mpsc;
 use futures::{
@@ -22,7 +21,6 @@ use futures::{
 use in_flight_requests::{AlreadyExistsError, InFlightRequests};
 use pin_project::pin_project;
 use std::{
-    convert::TryFrom,
     error::Error,
     fmt,
     marker::PhantomData,
@@ -182,19 +180,11 @@ where
     ) -> Result<TrackedRequest<Req>, AlreadyExistsError> {
         let span = info_span!(
             "RPC",
-            rpc.trace_id = %request.context.trace_id(),
             rpc.deadline = %humantime::format_rfc3339(request.context.deadline),
             otel.kind = "server",
             otel.name = tracing::field::Empty,
         );
-        span.set_context(&request.context);
-        request.context.trace_context = trace::Context::try_from(&span).unwrap_or_else(|_| {
-            tracing::trace!(
-                "OpenTelemetry subscriber not installed; making unsampled \
-                            child context."
-            );
-            request.context.trace_context.new_child()
-        });
+
         let entered = span.enter();
         tracing::info!("ReceiveRequest");
         let start = self.in_flight_requests_mut().start_request(
@@ -428,13 +418,9 @@ where
                             }
                         }
                     }
-                    ClientMessage::Cancel {
-                        trace_context,
-                        request_id,
-                    } => {
+                    ClientMessage::Cancel { request_id } => {
                         if !self.in_flight_requests_mut().cancel_request(request_id) {
                             tracing::trace!(
-                                rpc.trace_id = %trace_context.trace_id,
                                 "Received cancellation, but response handler is already complete.",
                             );
                         }
@@ -786,7 +772,7 @@ where
 mod tests {
     use super::{in_flight_requests::AlreadyExistsError, BaseChannel, Channel, Config, Requests};
     use crate::{
-        context, trace,
+        context,
         transport::channel::{self, UnboundedChannel},
         ClientMessage, Request, Response,
     };
@@ -924,12 +910,9 @@ mod tests {
             })
             .unwrap();
 
-        tx.send(ClientMessage::Cancel {
-            trace_context: trace::Context::default(),
-            request_id: 0,
-        })
-        .await
-        .unwrap();
+        tx.send(ClientMessage::Cancel { request_id: 0 })
+            .await
+            .unwrap();
 
         assert_matches!(
             channel.as_mut().poll_next(&mut noop_context()),

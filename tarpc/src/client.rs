@@ -25,6 +25,7 @@ use std::{
         Arc,
     },
 };
+use time::format_description::well_known::Rfc3339;
 use tokio::sync::{mpsc, oneshot};
 use tracing::Span;
 
@@ -116,7 +117,7 @@ impl<Req, Resp> Channel<Req, Resp> {
         name = "RPC",
         skip(self, ctx, request_name, request),
         fields(
-            rpc.deadline = %humantime::format_rfc3339(ctx.deadline),
+            rpc.deadline = %ctx.deadline.format(&Rfc3339).unwrap(),
             otel.kind = "client",
             otel.name = request_name)
         )]

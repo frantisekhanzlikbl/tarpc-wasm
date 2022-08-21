@@ -6,6 +6,7 @@ use std::{
     task::{Context, Poll},
     time::SystemTime,
 };
+use time::OffsetDateTime;
 use tokio_util::time::delay_queue::{self, DelayQueue};
 use tracing::Span;
 
@@ -43,9 +44,10 @@ impl InFlightRequests {
     pub fn start_request(
         &mut self,
         request_id: u64,
-        deadline: SystemTime,
+        deadline: OffsetDateTime,
         span: Span,
     ) -> Result<AbortRegistration, AlreadyExistsError> {
+        let deadline: SystemTime = deadline.into();
         match self.request_data.entry(request_id) {
             hash_map::Entry::Vacant(vacant) => {
                 let timeout = deadline.time_until();
@@ -141,7 +143,7 @@ mod tests {
         let mut in_flight_requests = InFlightRequests::default();
         assert_eq!(in_flight_requests.len(), 0);
         in_flight_requests
-            .start_request(0, SystemTime::now(), Span::current())
+            .start_request(0, OffsetDateTime::now_utc(), Span::current())
             .unwrap();
         assert_eq!(in_flight_requests.len(), 1);
     }
@@ -150,7 +152,7 @@ mod tests {
     async fn polling_expired_aborts() {
         let mut in_flight_requests = InFlightRequests::default();
         let abort_registration = in_flight_requests
-            .start_request(0, SystemTime::now(), Span::current())
+            .start_request(0, OffsetDateTime::now_utc(), Span::current())
             .unwrap();
         let mut abortable_future = Box::new(Abortable::new(pending::<()>(), abort_registration));
 
@@ -172,7 +174,7 @@ mod tests {
     async fn cancel_request_aborts() {
         let mut in_flight_requests = InFlightRequests::default();
         let abort_registration = in_flight_requests
-            .start_request(0, SystemTime::now(), Span::current())
+            .start_request(0, OffsetDateTime::now_utc(), Span::current())
             .unwrap();
         let mut abortable_future = Box::new(Abortable::new(pending::<()>(), abort_registration));
 
@@ -192,7 +194,7 @@ mod tests {
         let abort_registration = in_flight_requests
             .start_request(
                 0,
-                SystemTime::now() + std::time::Duration::from_secs(10),
+                OffsetDateTime::now_utc() + std::time::Duration::from_secs(10),
                 Span::current(),
             )
             .unwrap();

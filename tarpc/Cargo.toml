@@ -55,6 +55,11 @@ tracing = { version = "0.1", default-features = false, features = [
 	"attributes",
 	"log",
 ] }
+time = { version = "0.3.13", features = [
+	"wasm-bindgen",
+	"serde",
+	"formatting",
+] }
 
 [dev-dependencies]
 assert_matches = "1.4"

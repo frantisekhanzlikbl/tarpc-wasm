@@ -1,8 +1,4 @@
-use crate::{
-    context,
-    util::{Compact, TimeUntil},
-    Response,
-};
+use crate::{context, util::Compact, Response};
 use fnv::FnvHashMap;
 use std::{
     collections::hash_map,
@@ -64,7 +60,6 @@ impl<Resp> InFlightRequests<Resp> {
     ) -> Result<(), AlreadyExistsError> {
         match self.request_data.entry(request_id) {
             hash_map::Entry::Vacant(vacant) => {
-                let timeout = ctx.deadline.time_until();
                 vacant.insert(RequestData {
                     ctx,
                     span,

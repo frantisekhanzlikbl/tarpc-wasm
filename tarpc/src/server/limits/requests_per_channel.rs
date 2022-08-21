@@ -187,6 +187,7 @@ mod tests {
         marker::PhantomData,
         time::{Duration, SystemTime},
     };
+    use time::OffsetDateTime;
     use tracing::Span;
 
     #[tokio::test]
@@ -203,7 +204,7 @@ mod tests {
                 .in_flight_requests
                 .start_request(
                     i,
-                    SystemTime::now() + Duration::from_secs(1),
+                    OffsetDateTime::now_utc() + Duration::from_secs(1),
                     Span::current(),
                 )
                 .unwrap();
@@ -326,7 +327,7 @@ mod tests {
             .in_flight_requests
             .start_request(
                 0,
-                SystemTime::now() + Duration::from_secs(1),
+                OffsetDateTime::now_utc() + Duration::from_secs(1),
                 Span::current(),
             )
             .unwrap();

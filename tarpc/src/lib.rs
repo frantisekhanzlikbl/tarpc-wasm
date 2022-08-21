@@ -309,7 +309,8 @@ pub use crate::transport::sealed::Transport;
 
 use anyhow::Context as _;
 use futures::task::*;
-use std::{error::Error, fmt::Display, io, time::SystemTime};
+use std::{error::Error, fmt::Display, io};
+use time::OffsetDateTime;
 
 /// A message from a client to a server.
 #[derive(Debug)]
@@ -379,7 +380,7 @@ pub struct ServerError {
 
 impl<T> Request<T> {
     /// Returns the deadline for this request.
-    pub fn deadline(&self) -> &SystemTime {
+    pub fn deadline(&self) -> &OffsetDateTime {
         &self.context.deadline
     }
 }

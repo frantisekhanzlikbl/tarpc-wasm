@@ -27,6 +27,7 @@ use std::{
     mem::{self, ManuallyDrop},
     pin::Pin,
 };
+use time::format_description::well_known::Rfc3339;
 use tracing::{info_span, instrument::Instrument, Span};
 
 mod in_flight_requests;
@@ -180,7 +181,7 @@ where
     ) -> Result<TrackedRequest<Req>, AlreadyExistsError> {
         let span = info_span!(
             "RPC",
-            rpc.deadline = %humantime::format_rfc3339(request.context.deadline),
+            rpc.deadline = %request.context.deadline.format(&Rfc3339).unwrap(),
             otel.kind = "server",
             otel.name = tracing::field::Empty,
         );

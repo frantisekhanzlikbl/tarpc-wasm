@@ -183,10 +183,7 @@ mod tests {
         TrackedRequest,
     };
     use pin_utils::pin_mut;
-    use std::{
-        marker::PhantomData,
-        time::{Duration, SystemTime},
-    };
+    use std::{marker::PhantomData, time::Duration};
     use time::OffsetDateTime;
     use tracing::Span;
 

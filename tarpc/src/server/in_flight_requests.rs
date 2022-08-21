@@ -1,10 +1,9 @@
-use crate::util::{Compact, TimeUntil};
+use crate::util::Compact;
 use fnv::FnvHashMap;
 use futures::future::{AbortHandle, AbortRegistration};
 use std::{
     collections::hash_map,
     task::{Context, Poll},
-    time::SystemTime,
 };
 use time::OffsetDateTime;
 use tokio_util::time::delay_queue::{self, DelayQueue};
@@ -47,12 +46,11 @@ impl InFlightRequests {
         deadline: OffsetDateTime,
         span: Span,
     ) -> Result<AbortRegistration, AlreadyExistsError> {
-        let deadline: SystemTime = deadline.into();
         match self.request_data.entry(request_id) {
             hash_map::Entry::Vacant(vacant) => {
-                let timeout = deadline.time_until();
+                let timeout = deadline - OffsetDateTime::now_utc();
                 let (abort_handle, abort_registration) = AbortHandle::new_pair();
-                let deadline_key = self.deadlines.insert(request_id, timeout);
+                let deadline_key = self.deadlines.insert(request_id, timeout.unsigned_abs());
                 vacant.insert(RequestData {
                     abort_handle,
                     deadline_key,

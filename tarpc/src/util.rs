@@ -7,24 +7,12 @@
 use std::{
     collections::HashMap,
     hash::{BuildHasher, Hash},
-    time::{Duration, SystemTime},
+    time::Duration,
 };
 
 #[cfg(feature = "serde1")]
 #[cfg_attr(docsrs, doc(cfg(feature = "serde1")))]
 pub mod serde;
-
-/// Extension trait for [SystemTimes](SystemTime) in the future, i.e. deadlines.
-pub trait TimeUntil {
-    /// How much time from now until this time is reached.
-    fn time_until(&self) -> Duration;
-}
-
-impl TimeUntil for SystemTime {
-    fn time_until(&self) -> Duration {
-        self.duration_since(SystemTime::now()).unwrap_or_default()
-    }
-}
 
 /// Collection compaction; configurable `shrink_to_fit`.
 pub trait Compact {

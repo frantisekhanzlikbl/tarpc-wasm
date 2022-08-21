@@ -3,13 +3,14 @@ use futures::{
     future::{join_all, ready, Ready},
     prelude::*,
 };
-use std::time::{Duration, SystemTime};
+use std::time::Duration;
 use tarpc::{
     client::{self},
     context,
     server::{self, incoming::Incoming, BaseChannel, Channel},
     transport::channel,
 };
+use time::OffsetDateTime;
 use tokio::join;
 
 #[tarpc_plugins::service]
@@ -89,7 +90,7 @@ async fn dropped_channel_aborts_in_flight_requests() -> anyhow::Result<()> {
         let client = LoopClient::new(client::Config::default(), tx).spawn();
 
         let mut ctx = context::current();
-        ctx.deadline = SystemTime::now() + Duration::from_secs(60 * 60);
+        ctx.deadline = OffsetDateTime::now_utc() + Duration::from_secs(60 * 60);
         let _ = client.r#loop(ctx).await;
     });
 

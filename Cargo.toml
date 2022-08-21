@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 
-members = ["example-service", "tarpc", "plugins"]
+members = ["tarpc", "plugins"]
 
 [profile.dev]
 split-debuginfo = "unpacked"
